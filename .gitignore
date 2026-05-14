@@ -26,3 +26,12 @@ build/
 # logs
 *.log
 npm-debug.log*
+
+# 內部開發文件（保留本機，不進公開 repo）
+CLAUDE.md
+AGENTS.md
+SKILL.md
+SESSION.md
+TASK_LOG.md
+shared_context.md
+specs/
