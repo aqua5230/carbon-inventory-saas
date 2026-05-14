@@ -1,0 +1,28 @@
+# secrets
+.env
+*.env.local
+
+# database
+*.db
+*.sqlite
+*.sqlite3
+
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# node / next.js
+node_modules/
+.next/
+out/
+build/
+
+# os
+.DS_Store
+
+# logs
+*.log
+npm-debug.log*

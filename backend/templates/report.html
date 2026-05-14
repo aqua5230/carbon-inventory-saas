@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 2cm; }
+  body { font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif; font-size: 12pt; color: #1a1a1a; }
+  h1 { font-size: 20pt; text-align: center; color: #1a5c2a; margin-bottom: 4px; }
+  h2 { font-size: 14pt; color: #1a5c2a; border-bottom: 2px solid #1a5c2a; padding-bottom: 4px; margin-top: 24px; }
+  .subtitle { text-align: center; color: #666; margin-bottom: 24px; }
+  .meta-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  .meta-table td { padding: 6px 12px; border: 1px solid #ddd; }
+  .meta-table td:first-child { background: #f5f5f5; font-weight: bold; width: 30%; }
+  .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 16px 0; }
+  .summary-card { background: #f0f7f0; border: 1px solid #a8d5b0; border-radius: 8px; padding: 16px; text-align: center; }
+  .summary-card.scope3 { background: #eff6ff; border-color: #93c5fd; }
+  .summary-card.unclassified { background: #f3f4f6; border-color: #d1d5db; }
+  .summary-card.total { background: #1a5c2a; color: white; }
+  .summary-card .label { font-size: 10pt; color: #555; }
+  .summary-card.scope3 .label { color: #1d4ed8; }
+  .summary-card.unclassified .label { color: #4b5563; }
+  .summary-card.total .label { color: #ccc; }
+  .summary-card .value { font-size: 20pt; font-weight: bold; color: #1a5c2a; }
+  .summary-card.scope3 .value { color: #3b82f6; }
+  .summary-card.unclassified .value { color: #6b7280; }
+  .summary-card.total .value { color: white; }
+  .summary-card .unit { font-size: 9pt; color: #888; }
+  .summary-card.scope3 .unit { color: #60a5fa; }
+  .summary-card.unclassified .unit { color: #9ca3af; }
+  .summary-card.total .unit { color: #aaa; }
+  table.data { width: 100%; border-collapse: collapse; font-size: 10pt; margin-top: 12px; }
+  table.data th { background: #1a5c2a; color: white; padding: 8px; text-align: center; }
+  table.data td { padding: 6px 8px; border: 1px solid #ddd; text-align: right; }
+  table.data td:first-child, table.data td:nth-child(2) { text-align: center; }
+  table.data tr:nth-child(even) { background: #f9f9f9; }
+  .footer { margin-top: 32px; font-size: 9pt; color: #888; border-top: 1px solid #ddd; padding-top: 12px; }
+  .disclaimer { margin-top: 16px; font-size: 9pt; color: #888; background: #f5f5f5; padding: 12px; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<h1>溫室氣體盤查報告書</h1>
+<p class="subtitle">Greenhouse Gas Inventory Report</p>
+
+<h2>一、基本資料</h2>
+<table class="meta-table">
+  <tr><td>組織名稱</td><td>{{ org_name }}</td></tr>
+  <tr><td>廠區 / 設施</td><td>{{ facility_name }}</td></tr>
+  <tr><td>盤查年度</td><td>{{ year }} 年度（1月1日 至 12月31日）</td></tr>
+  <tr><td>報告產出日期</td><td>{{ generated_date }}</td></tr>
+  <tr><td>適用標準</td><td>{{ standard }}</td></tr>
+  <tr><td>盤查邊界</td><td>營運控制權法（Operational Control）</td></tr>
+  <tr><td>係數來源</td><td>{{ factor_source }}</td></tr>
+</table>
+
+<h2>二、排放量摘要</h2>
+<div class="summary-grid">
+  <div class="summary-card">
+    <div class="label">範疇一（直接排放）</div>
+    <div class="value">{{ "%.3f"|format(scope1_tonnes) }}</div>
+    <div class="unit">公噸 CO₂e</div>
+  </div>
+  <div class="summary-card">
+    <div class="label">範疇二（外購電力）</div>
+    <div class="value">{{ "%.3f"|format(scope2_tonnes) }}</div>
+    <div class="unit">公噸 CO₂e</div>
+  </div>
+  <div class="summary-card scope3">
+    <div class="label">範疇三排放</div>
+    <div class="value">{{ "%.3f"|format(scope3_tonnes) }}</div>
+    <div class="unit">公噸 CO₂e</div>
+  </div>
+  {% if unclassified_tonnes > 0 %}
+  <div class="summary-card unclassified">
+    <div class="label">未分類排放</div>
+    <div class="value">{{ "%.3f"|format(unclassified_tonnes) }}</div>
+    <div class="unit">公噸 CO₂e</div>
+  </div>
+  {% endif %}
+  <div class="summary-card total">
+    <div class="label">合計總排放量</div>
+    <div class="value">{{ "%.3f"|format(total_tonnes) }}</div>
+    <div class="unit">公噸 CO₂e</div>
+  </div>
+</div>
+
+<h2>三、排放明細</h2>
+<table class="data">
+  <thead>
+    <tr>
+      <th>月份</th>
+      <th>排放源</th>
+      <th>用量</th>
+      <th>單位</th>
+      <th>排放量 (kgCO₂e)</th>
+      <th>排放量 (tCO₂e)</th>
+      <th>排放範疇</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for s in sources %}
+    <tr>
+      <td>{{ s.month }} 月</td>
+      <td>{{ s.source_type }}</td>
+      <td>{{ "%.2f"|format(s.amount) }}</td>
+      <td>{{ s.unit }}</td>
+      <td>{{ "%.4f"|format(s.co2e_kg) }}</td>
+      <td>{{ "%.6f"|format(s.co2e_tonnes) }}</td>
+      <td>
+        {% if s.scope == 1 %}
+          範疇一
+        {% elif s.scope == 2 %}
+          範疇二
+        {% elif s.scope == 3 %}
+          範疇三
+        {% else %}
+          未分類
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>四、量化方法說明</h2>
+<table class="meta-table">
+  <tr><td>計算公式</td><td>GHG 排放量 (kgCO₂e) = 活動數據 × 排放係數 (kgCO₂e/單位)</td></tr>
+  <tr><td>電力係數</td><td>0.494 kgCO₂e/kWh（經濟部能源署 2023 年度公告，2024 年使用）</td></tr>
+  <tr><td>燃料係數</td><td>環境部 2024 年 2 月 5 日公告之溫室氣體排放係數</td></tr>
+  <tr><td>GWP 基準</td><td>IPCC 第六次評估報告（AR6）全球暖化潛勢值</td></tr>
+  <tr><td>盤查方法</td><td>GHG Protocol Corporate Accounting and Reporting Standard</td></tr>
+  <tr><td>不確定性說明</td><td>本盤查之計算不確定性主要來源為活動數據之測量精度及排放係數之估算誤差，整體不確定性估計在 ±5% 以內</td></tr>
+</table>
+
+<div class="disclaimer">
+  <strong>免責聲明：</strong>本報告書依據組織提供之活動數據及環境部公告之排放係數計算產出，計算結果之準確性取決於輸入數據之完整性與正確性。本報告書僅作為內部管理參考使用，如需正式查證，請洽具認可資格之第三方查證機構（如 BSI、BV、SGS 等）進行獨立查證。
+</div>
+
+<div class="footer">
+  本報告由碳盤查 SaaS 系統自動產出 ・ 計算基準：{{ standard }} ・ 產出日期：{{ generated_date }}
+</div>
+
+</body>
+</html>

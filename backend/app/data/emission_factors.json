@@ -1,0 +1,123 @@
+{
+  "version": "2024",
+  "source": "環境部 2024年2月5日公告",
+  "factors": {
+    "electricity": {
+      "name": "外購電力（台電）",
+      "unit": "kWh",
+      "co2e_per_unit": 0.494,
+      "co2e_unit": "kgCO2e",
+      "scope": 2,
+      "year": 2023,
+      "source": "經濟部能源署 2024年公告"
+    },
+    "diesel": {
+      "name": "柴油",
+      "unit": "公升",
+      "co2e_per_unit": 2.701,
+      "co2e_unit": "kgCO2e",
+      "scope": 1,
+      "year": 2024,
+      "source": "環境部溫室氣體排放係數管理表 6.0.4"
+    },
+    "gasoline": {
+      "name": "汽油",
+      "unit": "公升",
+      "co2e_per_unit": 2.263,
+      "co2e_unit": "kgCO2e",
+      "scope": 1,
+      "year": 2024,
+      "source": "環境部溫室氣體排放係數管理表 6.0.4"
+    },
+    "natural_gas": {
+      "name": "天然氣",
+      "unit": "立方公尺",
+      "co2e_per_unit": 2.098,
+      "co2e_unit": "kgCO2e",
+      "scope": 1,
+      "year": 2024,
+      "source": "環境部溫室氣體排放係數管理表 6.0.4"
+    },
+    "lpg": {
+      "name": "液化石油氣（LPG）",
+      "unit": "公斤",
+      "co2e_per_unit": 2.994,
+      "co2e_unit": "kgCO2e",
+      "scope": 1,
+      "year": 2024,
+      "source": "環境部溫室氣體排放係數管理表 6.0.4"
+    },
+    "heavy_oil": {
+      "name": "重油",
+      "unit": "公升",
+      "co2e_per_unit": 3.122,
+      "co2e_unit": "kgCO2e",
+      "scope": 1,
+      "year": 2024,
+      "source": "環境部溫室氣體排放係數管理表 6.0.4"
+    },
+    "commute_car": {
+      "name": "員工通勤-轎車",
+      "unit": "公里",
+      "co2e_per_unit": 0.21,
+      "co2e_unit": "kgCO2e",
+      "scope": 3,
+      "year": 2024,
+      "source": "預設係數"
+    },
+    "commute_public_transport": {
+      "name": "員工通勤-大眾運輸",
+      "unit": "公里",
+      "co2e_per_unit": 0.089,
+      "co2e_unit": "kgCO2e",
+      "scope": 3,
+      "year": 2024,
+      "source": "預設係數"
+    },
+    "waste_general": {
+      "name": "一般廢棄物",
+      "unit": "公斤",
+      "co2e_per_unit": 0.467,
+      "co2e_unit": "kgCO2e",
+      "scope": 3,
+      "year": 2024,
+      "source": "預設係數"
+    },
+    "waste_recycling": {
+      "name": "資源回收物",
+      "unit": "公斤",
+      "co2e_per_unit": 0.021,
+      "co2e_unit": "kgCO2e",
+      "scope": 3,
+      "year": 2024,
+      "source": "預設係數"
+    },
+    "water_supply": {
+      "name": "自來水",
+      "unit": "立方公尺",
+      "co2e_per_unit": 0.344,
+      "co2e_unit": "kgCO2e",
+      "scope": 3,
+      "year": 2024,
+      "source": "預設係數"
+    },
+    "business_travel_air_domestic": {
+      "name": "商務差旅-國內航空",
+      "unit": "公里",
+      "co2e_per_unit": 0.255,
+      "co2e_unit": "kgCO2e",
+      "scope": 3,
+      "year": 2024,
+      "source": "預設係數"
+    },
+    "business_travel_air_international": {
+      "name": "商務差旅-國際航空",
+      "unit": "公里",
+      "co2e_per_unit": 0.195,
+      "co2e_unit": "kgCO2e",
+      "scope": 3,
+      "year": 2024,
+      "source": "預設係數"
+    }
+  }
+}
