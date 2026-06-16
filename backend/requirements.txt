@@ -1,7 +1,7 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.0
 sqlalchemy==2.0.36
-python-multipart==0.0.12
+python-multipart==0.0.31
 pandas==2.2.3
 openpyxl==3.1.5
 weasyprint==62.3
