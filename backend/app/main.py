@@ -1,8 +1,13 @@
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base
 from .routers import organizations, activity, reports, auth
 from . import models
+
+load_dotenv()
 
 # 建立資料表 (確保在 models import 之後)
 Base.metadata.create_all(bind=engine)
@@ -13,9 +18,13 @@ app = FastAPI(
     version="0.1.0"
 )
 
+# CORS 來源白名單；逗號分隔。未設定時退回到本機開發 origin。
+_allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000")
+allowed_origins = [o.strip() for o in _allowed_origins_env.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # 簡化開發，允許所有來源
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

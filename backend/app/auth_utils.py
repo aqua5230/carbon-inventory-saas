@@ -12,7 +12,12 @@ from .models import User
 
 load_dotenv()
 
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY 未設定。請在 backend/.env 設定 SECRET_KEY，"
+        "可用 `python3 -c \"import secrets; print(secrets.token_hex(32))\"` 產生。"
+    )
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 

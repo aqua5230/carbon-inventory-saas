@@ -6,8 +6,9 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - SECRET_KEY=${SECRET_KEY:-dev-secret-key-change-in-production}
+      - SECRET_KEY=${SECRET_KEY:?需在 .env 設定 SECRET_KEY，可用 python3 -c "import secrets; print(secrets.token_hex(32))" 產生}
       - DATABASE_URL=sqlite:///./carbon_saas.db
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000}
     volumes:
       - ./backend/carbon_saas.db:/app/carbon_saas.db
     restart: unless-stopped
