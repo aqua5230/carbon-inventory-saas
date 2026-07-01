@@ -20,7 +20,7 @@ class User(Base):
 class Organization(Base):
     __tablename__ = "organizations"
     id = Column(Integer, primary_key=True, index=True)
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     name = Column(String(200), nullable=False)
     tax_id = Column(String(20), unique=True)
     industry_type = Column(String(100))
@@ -31,7 +31,7 @@ class Organization(Base):
 class Facility(Base):
     __tablename__ = "facilities"
     id = Column(Integer, primary_key=True, index=True)
-    org_id = Column(Integer, ForeignKey("organizations.id"), nullable=False)
+    org_id = Column(Integer, ForeignKey("organizations.id"), nullable=False, index=True)
     name = Column(String(200), nullable=False)
     address = Column(String(500))
     organization = relationship("Organization", back_populates="facilities")
@@ -40,7 +40,7 @@ class Facility(Base):
 class InventoryPeriod(Base):
     __tablename__ = "inventory_periods"
     id = Column(Integer, primary_key=True, index=True)
-    facility_id = Column(Integer, ForeignKey("facilities.id"), nullable=False)
+    facility_id = Column(Integer, ForeignKey("facilities.id"), nullable=False, index=True)
     year = Column(Integer, nullable=False)
     status = Column(String(20), default="draft")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -50,7 +50,7 @@ class InventoryPeriod(Base):
 class ActivityData(Base):
     __tablename__ = "activity_data"
     id = Column(Integer, primary_key=True, index=True)
-    period_id = Column(Integer, ForeignKey("inventory_periods.id"), nullable=False)
+    period_id = Column(Integer, ForeignKey("inventory_periods.id"), nullable=False, index=True)
     month = Column(Integer, nullable=False)  # 1-12
     source_type = Column(String(50), nullable=False)  # electricity, diesel, etc.
     amount = Column(Float, nullable=False)
