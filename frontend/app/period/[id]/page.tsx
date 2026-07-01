@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
-import { api, ActivityRecord, Summary, EmissionFactor } from "@/lib/api";
+import { api, ActivityRecord, Summary, EmissionFactor, UploadError } from "@/lib/api";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -38,6 +38,7 @@ export default function PeriodPage() {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [uploadErrors, setUploadErrors] = useState<UploadError[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -102,10 +103,17 @@ export default function PeriodPage() {
     if (!file) return;
     setUploading(true);
     setError("");
+    setSuccess("");
+    setUploadErrors([]);
     try {
       const result = await api.uploadExcel(periodId, file);
-      if (result.imported !== undefined) {
-        setSuccess(`✅ 成功匯入 ${result.imported} 筆數據！`);
+      setUploadErrors(result.errors ?? []);
+      if (result.error_count > 0) {
+        setSuccess(
+          `匯入完成：成功 ${result.success_count} 筆，失敗 ${result.error_count} 筆（詳見下方清單）`
+        );
+      } else {
+        setSuccess(`✅ 成功匯入 ${result.success_count} 筆數據！`);
         setTimeout(() => setSuccess(""), 4000);
       }
       await loadData();
@@ -194,6 +202,34 @@ export default function PeriodPage() {
       <main className="max-w-3xl mx-auto px-6 py-6">
         {error && <div className="mb-4 p-3 rounded-xl text-red-700 bg-red-50 border border-red-200 text-sm">⚠️ {error}</div>}
         {success && <div className="mb-4 p-3 rounded-xl text-green-700 bg-green-50 border border-green-200 text-sm font-medium">{success}</div>}
+
+        {/* Excel 匯入失敗明細 */}
+        {uploadErrors.length > 0 && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-medium text-amber-800">
+                ⚠️ 有 {uploadErrors.length} 筆資料未匯入，請修正 Excel 後重新上傳
+              </p>
+              <button
+                type="button"
+                onClick={() => setUploadErrors([])}
+                className="text-xs text-amber-500 hover:text-amber-700 cursor-pointer"
+              >
+                關閉
+              </button>
+            </div>
+            <ul className="space-y-1 text-xs text-amber-700">
+              {uploadErrors.map((ue, i) => (
+                <li key={i} className="flex gap-2">
+                  <span className="shrink-0 font-medium">
+                    {typeof ue.row === "number" ? `第 ${ue.row} 列` : ue.row}：
+                  </span>
+                  <span>{ue.error}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* 功能分頁 */}
         <div className="flex gap-1 bg-white rounded-2xl p-1 shadow-sm border border-gray-100 mb-6">
@@ -526,9 +562,9 @@ export default function PeriodPage() {
                   <ul className="space-y-2 text-sm text-gray-600">
                     {[
                       "公司基本資料與盤查期間",
-                      "範疇一（直接排放）+ 範疇二（電力排放）合計",
+                      "範疇一（直接）、範疇二（電力）、範疇三（其他間接）排放量",
                       "每月、每種能源的詳細排放明細表",
-                      "計算方法說明與係數來源（符合 ISO 14064-1）",
+                      "計算方法說明、係數版本與產出時間（符合 ISO 14064-1）",
                       "可交給客戶或查驗機構的正式文件",
                     ].map(item => (
                       <li key={item} className="flex items-center gap-2">
@@ -542,22 +578,22 @@ export default function PeriodPage() {
                 {summary && (
                   <div className="bg-white rounded-2xl border border-gray-100 p-5">
                     <h3 className="font-bold text-gray-800 mb-3">📊 目前排放量統計</h3>
-                    <div className="grid grid-cols-3 gap-3 text-center">
-                      <div className="bg-orange-50 rounded-xl p-3">
-                        <p className="text-xs text-gray-500">直接排放（燃油/燃氣）</p>
-                        <p className="text-xl font-bold text-orange-600 mt-1">{summary.scope1_tonnes.toFixed(3)}</p>
-                        <p className="text-xs text-gray-400">公噸 CO₂e</p>
-                      </div>
-                      <div className="bg-blue-50 rounded-xl p-3">
-                        <p className="text-xs text-gray-500">電力排放</p>
-                        <p className="text-xl font-bold text-blue-600 mt-1">{summary.scope2_tonnes.toFixed(3)}</p>
-                        <p className="text-xs text-gray-400">公噸 CO₂e</p>
-                      </div>
-                      <div className="rounded-xl p-3" style={{ background: "#f0f7f1" }}>
-                        <p className="text-xs text-gray-500">總計</p>
-                        <p className="text-xl font-bold mt-1" style={{ color: "#1a5c2a" }}>{summary.total_tonnes.toFixed(3)}</p>
-                        <p className="text-xs text-gray-400">公噸 CO₂e</p>
-                      </div>
+                    <div className="grid grid-cols-4 gap-3 text-center">
+                      {[
+                        { label: "直接排放", sub: "Scope 1", value: summary.scope1_tonnes, color: "#ef4444" },
+                        { label: "電力排放", sub: "Scope 2", value: summary.scope2_tonnes, color: "#f97316" },
+                        { label: "其他間接", sub: "Scope 3", value: summary.scope3_tonnes || 0, color: "#3b82f6" },
+                        { label: "總計", sub: "合計", value: summary.total_tonnes, color: "#1a5c2a" },
+                      ].map(card => (
+                        <div key={card.label} className="rounded-xl p-3 bg-gray-50">
+                          <p className="text-xs text-gray-500">{card.label}</p>
+                          <p className="text-xs text-gray-400">{card.sub}</p>
+                          <p className="text-xl font-bold mt-1" style={{ color: card.color }}>
+                            {card.value.toFixed(3)}
+                          </p>
+                          <p className="text-xs text-gray-400">公噸 CO₂e</p>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

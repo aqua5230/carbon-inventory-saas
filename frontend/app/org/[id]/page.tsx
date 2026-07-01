@@ -103,6 +103,8 @@ export default function OrgPage() {
 
   const currentYear = new Date().getFullYear();
   const hasAnyPeriod = facilities.some(f => (periods[f.id] || []).length > 0);
+  // 步驟條當前位置：無廠址 → 第 2 步；已有廠址 → 第 3 步（去年度頁填數據）
+  const currentStep = facilities.length === 0 ? 2 : 3;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -120,21 +122,21 @@ export default function OrgPage() {
         <div className="max-w-3xl mx-auto">
           <p className="text-xs text-gray-500 mb-3 font-medium">使用流程（共 4 步）</p>
           <div className="flex items-center gap-2 text-sm overflow-x-auto">
-            {[
-              { n: "1", label: "建立公司檔案", done: true },
-              { n: "2", label: "新增廠址", active: true },
-              { n: "3", label: "填寫用電/用油數據" },
-              { n: "4", label: "下載碳排放報告" },
-            ].map((step, i) => (
-              <div key={i} className="flex items-center gap-2 shrink-0">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step.done ? "bg-green-100 text-green-700" : step.active ? "text-white" : "bg-gray-100 text-gray-400"}`}
-                  style={step.active ? { background: "#1a5c2a" } : {}}>
-                  {step.done ? "✓" : step.n}
+            {["建立公司檔案", "新增廠址", "填寫用電/用油數據", "下載碳排放報告"].map((label, i) => {
+              const n = i + 1;
+              const done = n < currentStep;
+              const active = n === currentStep;
+              return (
+                <div key={i} className="flex items-center gap-2 shrink-0">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${done ? "bg-green-100 text-green-700" : active ? "text-white" : "bg-gray-100 text-gray-400"}`}
+                    style={active ? { background: "#1a5c2a" } : {}}>
+                    {done ? "✓" : n}
+                  </div>
+                  <span className={active ? "font-medium text-gray-800" : done ? "text-green-700" : "text-gray-400"}>{label}</span>
+                  {i < 3 && <span className="text-gray-300 mx-1">→</span>}
                 </div>
-                <span className={step.active ? "font-medium text-gray-800" : step.done ? "text-green-700" : "text-gray-400"}>{step.label}</span>
-                {i < 3 && <span className="text-gray-300 mx-1">→</span>}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

@@ -70,16 +70,20 @@ export const api = {
   deleteActivity: (id: number) =>
     request<void>(`/api/activity/${id}`, { method: "DELETE" }),
   getSummary: (periodId: number) => request<Summary>(`/api/periods/${periodId}/summary`),
-  uploadExcel: (periodId: number, file: File) => {
+  uploadExcel: async (periodId: number, file: File): Promise<UploadResult> => {
     const form = new FormData();
     form.append("file", file);
     const token = typeof window !== "undefined" ? localStorage.getItem("token") : "";
-    return fetch(`${BASE_URL}/api/periods/${periodId}/upload-excel`, { 
-      method: "POST", 
+    const res = await fetch(`${BASE_URL}/api/periods/${periodId}/upload-excel`, {
+      method: "POST",
       body: form,
-      headers: { "Authorization": `Bearer ${token ?? ""}` }
-    })
-      .then(r => r.json());
+      headers: { "Authorization": `Bearer ${token ?? ""}` },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || "Excel 上傳失敗");
+    }
+    return res.json();
   },
   downloadTemplate: () => `${BASE_URL}/api/template/download`,
   reportUrl: (periodId: number, format: "pdf" | "html") =>
@@ -111,6 +115,16 @@ export interface ActivityRecord extends ActivityInput {
   co2e_tonnes: number;
   scope: number;
   period_id: number;
+}
+export interface UploadError {
+  row: number | string;
+  error: string;
+}
+export interface UploadResult {
+  success_count: number;
+  error_count: number;
+  errors: UploadError[];
+  imported: number;
 }
 export interface Summary {
   scope1_tonnes: number;
