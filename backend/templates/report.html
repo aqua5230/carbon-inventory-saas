@@ -48,9 +48,11 @@
   <tr><td>廠區 / 設施</td><td>{{ facility_name }}</td></tr>
   <tr><td>盤查年度</td><td>{{ year }} 年度（1月1日 至 12月31日）</td></tr>
   <tr><td>報告產出日期</td><td>{{ generated_date }}</td></tr>
+  <tr><td>報告產出時間</td><td>{{ generated_at|default(generated_date) }}（Asia/Taipei）</td></tr>
   <tr><td>適用標準</td><td>{{ standard }}</td></tr>
   <tr><td>盤查邊界</td><td>營運控制權法（Operational Control）</td></tr>
-  <tr><td>係數來源</td><td>{{ factor_source }}</td></tr>
+  <tr><td>係數來源</td><td>{{ dataset_source|default(factor_source) }}</td></tr>
+  <tr><td>係數版本</td><td>{{ dataset_version|default('—') }}（共 {{ factors_count|default('—') }} 項排放源）</td></tr>
 </table>
 
 <h2>二、排放量摘要</h2>
@@ -126,7 +128,7 @@
 <table class="meta-table">
   <tr><td>計算公式</td><td>GHG 排放量 (kgCO₂e) = 活動數據 × 排放係數 (kgCO₂e/單位)</td></tr>
   <tr><td>電力係數</td><td>0.494 kgCO₂e/kWh（經濟部能源署 2023 年度公告，2024 年使用）</td></tr>
-  <tr><td>燃料係數</td><td>環境部 2024 年 2 月 5 日公告之溫室氣體排放係數</td></tr>
+  <tr><td>燃料係數</td><td>{{ dataset_source|default('環境部 2024 年 2 月 5 日公告之溫室氣體排放係數') }}（資料集版本 {{ dataset_version|default('—') }}）</td></tr>
   <tr><td>GWP 基準</td><td>IPCC 第六次評估報告（AR6）全球暖化潛勢值</td></tr>
   <tr><td>盤查方法</td><td>GHG Protocol Corporate Accounting and Reporting Standard</td></tr>
   <tr><td>不確定性說明</td><td>本盤查之計算不確定性主要來源為活動數據之測量精度及排放係數之估算誤差，整體不確定性估計在 ±5% 以內</td></tr>
@@ -137,7 +139,7 @@
 </div>
 
 <div class="footer">
-  本報告由碳盤查 SaaS 系統自動產出 ・ 計算基準：{{ standard }} ・ 產出日期：{{ generated_date }}
+  本報告由碳盤查 SaaS 系統自動產出 ・ 計算基準：{{ standard }} ・ 係數版本：{{ dataset_version|default('—') }} ・ 產出時間：{{ generated_at|default(generated_date) }}
 </div>
 
 </body>

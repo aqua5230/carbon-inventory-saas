@@ -9,6 +9,8 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
+from app.services import calculator, report_generator
+
 
 TEMPLATE_DIR = Path(__file__).resolve().parent.parent / "templates"
 
@@ -92,3 +94,39 @@ def test_report_renders_without_optional_scope3_keys():
     }
     html = _render(summary)
     assert html  # 不空就行
+
+
+def test_generate_pdf_includes_dataset_version_and_generated_at():
+    """report_generator.generate_pdf 必須把係數版本與精確時間注入模板。
+
+    WeasyPrint 未安裝時會回傳 HTML bytes（見 generate_pdf 的 fallback），
+    剛好讓我們可以直接斷言內容。WeasyPrint 有裝則回 PDF bytes，
+    這個測試會 skip 過第二段斷言（PDF 是 binary）。"""
+    summary = calculator.get_period_summary([])  # 含 factor_metadata
+    summary.update(
+        {
+            "scope1_tonnes": 1.0,
+            "scope2_tonnes": 2.0,
+            "scope3_tonnes": 0.5,
+            "total_tonnes": 3.5,
+            "sources": [],
+        }
+    )
+    out = report_generator.generate_pdf(
+        org_name="稽核測試公司",
+        facility_name="總部",
+        year=2026,
+        summary=summary,
+    )
+    assert isinstance(out, bytes)
+    if out.startswith(b"%PDF"):
+        # 有裝 WeasyPrint，內容無法純文字比對，至少確認非空且為 PDF
+        return
+    text = out.decode("utf-8")
+    meta = calculator.get_factor_metadata()
+    assert meta["dataset_version"] in text
+    assert meta["dataset_source"] in text
+    assert "Asia/Taipei" in text
+    # 時間應有 +0800 時區字樣（generated_at）
+    assert "+0800" in text
+    assert "稽核測試公司" in text

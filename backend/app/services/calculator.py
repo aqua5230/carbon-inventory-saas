@@ -6,7 +6,25 @@ _factors_path = Path(__file__).parent.parent / "data" / "emission_factors.json"
 with open(_factors_path, "r", encoding="utf-8") as f:
     EMISSION_DATA = json.load(f)
 
+# fail-fast：缺 version / source 直接拒絕載入，避免報告靜默使用空值
+if "version" not in EMISSION_DATA or "source" not in EMISSION_DATA:
+    raise RuntimeError(
+        "emission_factors.json 必須含頂層 version 與 source 欄位（供報告稽核回溯）"
+    )
+
 FACTORS = EMISSION_DATA["factors"]
+
+FACTOR_METADATA = {
+    "dataset_version": EMISSION_DATA["version"],
+    "dataset_source": EMISSION_DATA["source"],
+    "factors_count": len(FACTORS),
+    "standard": "ISO 14064-1:2018",
+}
+
+
+def get_factor_metadata() -> dict:
+    """回傳目前載入係數的版本/來源/數量（供報告與 API 回溯）"""
+    return dict(FACTOR_METADATA)
 
 def get_factor(source_type: str) -> dict:
     if source_type not in FACTORS:
@@ -88,7 +106,8 @@ def get_period_summary(activity_records: list) -> dict:
             "scope3": round(scope3_kg / 1000, 6),
             "unclassified": round(unclassified_kg / 1000, 6)
         },
-        "sources": sources
+        "sources": sources,
+        "factor_metadata": get_factor_metadata(),
     }
 
 def list_factors() -> list:

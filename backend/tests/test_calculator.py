@@ -4,7 +4,14 @@ from types import SimpleNamespace
 
 import pytest
 
-from app.services.calculator import calculate, get_factor, get_period_summary, list_factors
+from app.services.calculator import (
+    EMISSION_DATA,
+    calculate,
+    get_factor,
+    get_factor_metadata,
+    get_period_summary,
+    list_factors,
+)
 
 
 def test_calculate_electricity_uses_scope2_factor():
@@ -79,6 +86,21 @@ def test_period_summary_empty_returns_zeros():
     assert summary["scope3_kg"] == 0
     assert summary["unclassified_kg"] == 0
     assert summary["sources"] == []
+
+
+def test_factor_metadata_matches_emission_factors_json():
+    meta = get_factor_metadata()
+    assert meta["dataset_version"] == EMISSION_DATA["version"]
+    assert meta["dataset_source"] == EMISSION_DATA["source"]
+    assert meta["factors_count"] == len(EMISSION_DATA["factors"])
+    assert meta["standard"].startswith("ISO 14064")
+
+
+def test_period_summary_includes_factor_metadata():
+    summary = get_period_summary([])
+    meta = summary["factor_metadata"]
+    assert meta["dataset_version"] == EMISSION_DATA["version"]
+    assert meta["factors_count"] == len(EMISSION_DATA["factors"])
 
 
 def test_list_factors_contains_required_sources():
