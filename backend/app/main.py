@@ -3,14 +3,13 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .database import engine, Base
 from .routers import organizations, activity, reports, auth
-from . import models
+from . import models  # noqa: F401  ← 確保 model class 註冊到 Base.metadata（給 alembic 用）
 
 load_dotenv()
 
-# 建立資料表 (確保在 models import 之後)
-Base.metadata.create_all(bind=engine)
+# Schema 由 alembic 管理：本機開發 `alembic upgrade head`，Docker 啟動會自動跑（見 backend/Dockerfile）。
+# conftest.py 用 in-memory SQLite + Base.metadata.create_all，不受此移除影響。
 
 app = FastAPI(
     title="碳排放 SaaS API",
