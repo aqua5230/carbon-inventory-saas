@@ -1,9 +1,12 @@
+import logging
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
 from . import calculator
+
+logger = logging.getLogger(__name__)
 
 TEMPLATE_DIR = Path(__file__).parent.parent.parent / "templates"
 
@@ -49,7 +52,9 @@ def generate_pdf(org_name: str, facility_name: str, year: int, summary: dict) ->
         from weasyprint import HTML
         pdf_bytes = HTML(string=html_content, base_url=str(TEMPLATE_DIR)).write_pdf()
         return pdf_bytes
-    except (ImportError, OSError):
+    except (ImportError, OSError) as exc:
         # WeasyPrint 未安裝或系統庫（gobject / pango / cairo）缺失時，
-        # 回傳 HTML 作為備用，避免報告生成整體失敗
+        # 回傳 HTML 作為備用，避免報告生成整體失敗。
+        # 必須留下紀錄：否則正式環境會一直發出副檔名為 .pdf 的 HTML 而無人察覺。
+        logger.warning("WeasyPrint 無法產生 PDF，改回傳 HTML：%s", exc)
         return html_content.encode("utf-8")
