@@ -84,3 +84,12 @@ def test_invalid_amount_recorded_as_error_not_fatal():
     assert any(r["month"] == 2 and r["amount"] == 500 for r in result["data"])
     assert len(result["errors"]) == 1
     assert "electricity" in result["errors"][0]["error"]
+
+
+def test_negative_amount_recorded_as_error():
+    df = pd.DataFrame({"月份": [1], "用電度數(kWh)": [-100]})
+    result = parse_excel(_make_xlsx(df))
+    assert result["data"] == []
+    assert result["errors"] == [
+        {"row": 2, "error": "electricity 數值不可為負數: -100"}
+    ]

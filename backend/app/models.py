@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Text, Enum
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
-from datetime import datetime
+from datetime import datetime, timezone
 import enum
 
 class InventoryStatus(str, enum.Enum):
@@ -15,7 +15,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(200), unique=True, index=True, nullable=False)
     hashed_password = Column(String(500), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc).replace(tzinfo=None))
 
 class Organization(Base):
     __tablename__ = "organizations"

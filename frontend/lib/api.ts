@@ -42,7 +42,7 @@ export const api = {
   // Organizations
   getOrgs: () => request<Organization[]>("/api/organizations"),
   getOrgSummary: (orgId: number) => request<OrgSummary>(`/api/organizations/${orgId}/summary`),
-  createOrg: (data: { name: string; tax_id?: string; industry?: string; contact_email?: string }) =>
+  createOrg: (data: { name: string; tax_id?: string; industry_type?: string; contact_email?: string }) =>
     request<Organization>("/api/organizations", { method: "POST", body: JSON.stringify(data) }),
 
   // Facilities
@@ -86,12 +86,21 @@ export const api = {
     return res.json();
   },
   downloadTemplate: () => `${BASE_URL}/api/template/download`,
-  reportUrl: (periodId: number, format: "pdf" | "html") =>
-    `${BASE_URL}/api/periods/${periodId}/report?format=${format}`,
+  getReport: async (periodId: number, format: "pdf" | "html") => {
+    const token = typeof window !== "undefined" ? window.localStorage.getItem("token") : "";
+    const res = await fetch(`${BASE_URL}/api/periods/${periodId}/report?format=${format}`, {
+      headers: { "Authorization": `Bearer ${token ?? ""}` },
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: res.statusText }));
+      throw new Error(err.detail || "報告產生失敗");
+    }
+    return res.blob();
+  },
 };
 
 // Types
-export interface Organization { id: number; name: string; tax_id?: string; industry?: string; contact_email?: string; }
+export interface Organization { id: number; name: string; tax_id?: string; industry_type?: string; contact_email?: string; }
 export interface OrgSummary {
   scope1_tonnes: number;
   scope2_tonnes: number;

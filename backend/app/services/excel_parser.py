@@ -1,6 +1,6 @@
 import pandas as pd
 from io import BytesIO
-from typing import List, Dict
+from typing import Dict
 
 # 欄位對應（支援中英文欄位名稱）
 COLUMN_ALIASES = {
@@ -67,7 +67,7 @@ def parse_excel(file_bytes: bytes) -> Dict:
             if not (1 <= month <= 12):
                 errors.append({"row": row_num, "error": f"月份無效: {month_val}"})
                 continue
-        except:
+        except Exception:
             errors.append({"row": row_num, "error": f"月份格式錯誤: {month_val}"})
             continue
 
@@ -82,13 +82,16 @@ def parse_excel(file_bytes: bytes) -> Dict:
                 continue
             try:
                 amount = float(val)
+                if amount < 0:
+                    errors.append({"row": row_num, "error": f"{source_type} 數值不可為負數: {val}"})
+                    continue
                 records.append({
                     "month": month,
                     "source_type": source_type,
                     "amount": amount,
                     "unit": source_units.get(source_type, "單位"),
                 })
-            except:
+            except Exception:
                 errors.append({"row": row_num, "error": f"{source_type} 數值無效: {val}"})
 
     return {"data": records, "errors": errors}

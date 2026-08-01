@@ -10,7 +10,7 @@
 import os
 
 # 一定要在 import app 前設定 SECRET_KEY，否則 auth_utils 啟動會 raise。
-os.environ.setdefault("SECRET_KEY", "test-secret-key-for-pytest-only")
+os.environ.setdefault("SECRET_KEY", "test-secret-key-for-pytest-only-32bytes")
 # 一般測試關閉 login rate limit，避免反覆 register/login 觸發 429。
 # 專門驗證 rate limit 的測試自己重新開啟。
 os.environ.setdefault("RATE_LIMIT_ENABLED", "false")

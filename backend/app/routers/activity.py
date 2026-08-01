@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from io import BytesIO
 from ..database import get_db
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/api", tags=["activity"])
 class ActivityCreate(BaseModel):
     month: int
     source_type: str
-    amount: float
+    amount: float = Field(gt=0)
     note: Optional[str] = None
 
 @router.get("/factors")

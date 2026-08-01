@@ -81,6 +81,25 @@ def test_duplicate_tax_id_returns_400(client, user_a):
     assert second.status_code == 400
 
 
+def test_create_org_preserves_profile_fields(client, user_a):
+    response = client.post(
+        "/api/organizations",
+        json={
+            "name": "OrgA",
+            "tax_id": _rand_tax_id(),
+            "industry_type": "製造業",
+            "contact_email": "contact@example.com",
+        },
+        headers=user_a,
+    )
+    assert response.status_code == 200
+    assert response.json()["industry_type"] == "製造業"
+    assert response.json()["contact_email"] == "contact@example.com"
+    listed = client.get("/api/organizations", headers=user_a).json()
+    assert listed[0]["industry_type"] == "製造業"
+    assert listed[0]["contact_email"] == "contact@example.com"
+
+
 def test_period_status_update_owner_only(client, user_a, user_b):
     org = client.post(
         "/api/organizations",
@@ -114,3 +133,28 @@ def test_period_status_update_owner_only(client, user_a, user_b):
         headers=user_b,
     )
     assert bad.status_code == 404
+
+
+def test_negative_activity_amount_is_rejected(client, user_a):
+    org = client.post(
+        "/api/organizations",
+        json={"name": "OrgA", "tax_id": _rand_tax_id()},
+        headers=user_a,
+    ).json()
+    facility = client.post(
+        f"/api/organizations/{org['id']}/facilities",
+        json={"name": "Plant1"},
+        headers=user_a,
+    ).json()
+    period = client.post(
+        f"/api/facilities/{facility['id']}/periods",
+        json={"year": 2026},
+        headers=user_a,
+    ).json()
+
+    response = client.post(
+        f"/api/periods/{period['id']}/activity",
+        json={"month": 1, "source_type": "electricity", "amount": -100},
+        headers=user_a,
+    )
+    assert response.status_code == 422

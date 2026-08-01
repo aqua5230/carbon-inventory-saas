@@ -18,8 +18,8 @@ load_dotenv()
 
 # 確保 import app.* 找得到。alembic 預期從 backend/ 執行，沒問題；
 # 但 IDE / 子目錄呼叫時加保險。
-import sys
-from pathlib import Path
+import sys  # noqa: E402
+from pathlib import Path  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from app.database import Base  # noqa: E402

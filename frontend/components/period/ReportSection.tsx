@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ActivityRecord, Summary, api } from "@/lib/api";
 
 // 下載報告分頁：報告內容說明 + 排放量統計 + PDF/HTML 下載
@@ -12,6 +13,37 @@ export default function ReportSection({
   periodId: number;
   onGoManual: () => void;
 }) {
+  const [downloadError, setDownloadError] = useState("");
+  const [downloading, setDownloading] = useState<"pdf" | "html" | null>(null);
+
+  async function openReport(format: "pdf" | "html") {
+    const previewWindow = format === "html" ? window.open("", "_blank") : null;
+    if (format === "html" && !previewWindow) {
+      setDownloadError("瀏覽器已阻擋新視窗，請允許彈出式視窗後重試");
+      return;
+    }
+    setDownloading(format);
+    setDownloadError("");
+    try {
+      const blob = await api.getReport(periodId, format);
+      const url = URL.createObjectURL(blob);
+      if (format === "html" && previewWindow) {
+        previewWindow.location.href = url;
+      } else {
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `碳盤查報告_${periodId}.pdf`;
+        link.click();
+      }
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (err: unknown) {
+      previewWindow?.close();
+      setDownloadError(err instanceof Error ? err.message : "報告產生失敗");
+    } finally {
+      setDownloading(null);
+    }
+  }
+
   if (records.length === 0) {
     return (
       <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center">
@@ -73,17 +105,19 @@ export default function ReportSection({
 
       {/* 下載按鈕 */}
       <div className="grid grid-cols-1 gap-3">
-        <a href={api.reportUrl(periodId, "pdf")} target="_blank" rel="noopener noreferrer"
+        <button type="button" onClick={() => openReport("pdf")} disabled={downloading !== null}
           className="flex items-center justify-center gap-2 py-4 rounded-2xl text-white font-medium text-sm hover:opacity-90"
           style={{ background: "#1a5c2a" }}>
-          📄 下載 PDF 報告（正式文件）
-        </a>
-        <a href={api.reportUrl(periodId, "html")} target="_blank" rel="noopener noreferrer"
+          {downloading === "pdf" ? "產生中…" : "📄 下載 PDF 報告（正式文件）"}
+        </button>
+        <button type="button" onClick={() => openReport("html")} disabled={downloading !== null}
           className="flex items-center justify-center gap-2 py-4 rounded-2xl font-medium text-sm border-2 hover:bg-green-50"
           style={{ borderColor: "#1a5c2a", color: "#1a5c2a" }}>
-          🌐 線上預覽報告內容
-        </a>
+          {downloading === "html" ? "產生中…" : "🌐 線上預覽報告內容"}
+        </button>
       </div>
+
+      {downloadError && <p role="alert" className="text-sm text-center text-red-600">{downloadError}</p>}
 
       <p className="text-xs text-center text-gray-400">
         報告符合 ISO 14064-1 國際標準，可提交給客戶、ESG 評估機構或主管機關

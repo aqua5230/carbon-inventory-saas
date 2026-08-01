@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { api, ActivityRecord, Summary, EmissionFactor, UploadError } from "@/lib/api";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -26,12 +26,7 @@ export default function PeriodPage() {
   const [uploadErrors, setUploadErrors] = useState<UploadError[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    loadData();
-    api.getFactors().then(setFactors).catch(() => {});
-  }, [periodId]);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     try {
       const [recs, sum] = await Promise.all([
         api.getActivity(periodId),
@@ -42,7 +37,14 @@ export default function PeriodPage() {
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "載入失敗");
     }
-  }
+  }, [periodId]);
+
+  useEffect(() => {
+    loadData();
+    api.getFactors().then(setFactors).catch((err: unknown) => {
+      setError(err instanceof Error ? err.message : "排放係數載入失敗");
+    });
+  }, [loadData]);
 
   async function addRecord(e: React.FormEvent) {
     e.preventDefault();

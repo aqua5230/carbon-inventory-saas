@@ -10,7 +10,7 @@ export default function Home() {
   const [summaries, setSummaries] = useState<Record<number, OrgSummary>>({});
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ name: "", tax_id: "", industry: "", contact_email: "" });
+  const [form, setForm] = useState({ name: "", tax_id: "", industry_type: "", contact_email: "" });
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export default function Home() {
         },
       }));
       setShowForm(false);
-      setForm({ name: "", tax_id: "", industry: "", contact_email: "" });
+      setForm({ name: "", tax_id: "", industry_type: "", contact_email: "" });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "建立失敗");
     }
@@ -158,8 +158,8 @@ export default function Home() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">產業類別 <span className="text-gray-400 font-normal">（選填）</span></label>
                   <select
-                    value={form.industry}
-                    onChange={e => setForm(p => ({ ...p, industry: e.target.value }))}
+                    value={form.industry_type}
+                    onChange={e => setForm(p => ({ ...p, industry_type: e.target.value }))}
                     className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-600"
                   >
                     <option value="">請選擇...</option>
@@ -243,7 +243,7 @@ export default function Home() {
                           </div>
                           <div>
                             <h3 className="font-semibold text-gray-900">{org.name}</h3>
-                            <p className="text-xs text-gray-400">{org.industry || "點擊進入 →"}</p>
+                            <p className="text-xs text-gray-400">{org.industry_type || "點擊進入 →"}</p>
                           </div>
                         </div>
                         <span className="text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: "#1a5c2a" }}>
