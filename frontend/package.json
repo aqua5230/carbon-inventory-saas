@@ -10,7 +10,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "next": "16.1.6",
+    "next": "16.2.11",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "recharts": "^3.8.1"
@@ -25,10 +25,10 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.2",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6",
+    "eslint-config-next": "16.2.11",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.7"
   }
 }
